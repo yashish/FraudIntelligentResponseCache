@@ -1,0 +1,11 @@
+[project]
+name = "fraudintelligentresponsecache"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.118.0",
+    "redis[async]>=6.4.0",
+    "uvicorn>=0.37.0",
+]
