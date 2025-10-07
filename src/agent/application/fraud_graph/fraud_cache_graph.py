@@ -1,5 +1,6 @@
 from langgraph.graph import StateGraph
 from langchain_core.runnables import RunnableLambda
+#from aml_model import aml_model
 #from langchain_core import LLM
 #from langchain_core.prompts import PromptTemplate
 #from langchain_community.cache import RedisCache
@@ -59,12 +60,22 @@ def score_transaction(transaction_details: str) -> dict:
 def score_risk(state):
     """Scores risk based on the state."""
     # Placeholder logic for risk scoring
-    risk_score = random.randint(0, 100)
+    #risk_score = random.randint(0, 100)
   
-
     features = state.get("aml_features", {})
+    
     # simulated model prediction. Replace with actual model inference
+    risk_score = aml_model.predict_proba([features])[0][1] * 100 
+    is_high_risk = risk_score > 75  # threshold
+    state["is_high_risk"] = is_high_risk    
 
-    return {"state": state, "risk_score": risk_score}
+    return {
+        **state, 
+        "risk_score": risk_score, 
+        "is_high_risk": is_high_risk,
+        "risk_reason": "High risk based on AML features" if is_high_risk else "Low risk"
+        }
+
+score_risk_node = RunnableLambda(score_risk, name="score_risk")
 
 
