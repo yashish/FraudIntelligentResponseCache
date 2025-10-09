@@ -1,4 +1,4 @@
-# aml_features.py
+# fraud_features.py
 
 FEATURE_SCHEMA = [
     "transaction_amount",

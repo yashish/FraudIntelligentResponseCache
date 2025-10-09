@@ -1,7 +1,7 @@
 import joblib
 #from azureml.core import Workspace, Model
 import numpy as np
-from aml_features import FEATURE_SCHEMA, ENCODERS
+from fraud_features import FEATURE_SCHEMA, ENCODERS
 
 """ class AMLModel:
     def __init__(self, model_name: str, workspace_config: str):
@@ -21,7 +21,7 @@ from aml_features import FEATURE_SCHEMA, ENCODERS
 # aml_model = AMLModel(model_name="your_model_name", workspace_config="config.json")
 
 # Load the trained model
-model = joblib.load("aml_model.pkl")
+model = joblib.load("fraud_model.pkl")
 
 def encode_input(raw: dict) -> list[float]:
     return [

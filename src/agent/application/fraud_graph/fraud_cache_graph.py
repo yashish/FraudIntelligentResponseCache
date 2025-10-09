@@ -1,6 +1,6 @@
 from langgraph.graph import StateGraph
 from langchain_core.runnables import RunnableLambda
-#from aml_model import aml_model
+from fraud_model import fraud_model
 #from langchain_core import LLM
 #from langchain_core.prompts import PromptTemplate
 #from langchain_community.cache import RedisCache
@@ -65,7 +65,7 @@ def score_risk(state):
     features = state.get("aml_features", {})
     
     # simulated model prediction. Replace with actual model inference
-    risk_score = aml_model.predict_proba([features])[0][1] * 100 
+    risk_score = fraud_model.predict_proba([features])[0][1] * 100 
     is_high_risk = risk_score > 75  # threshold
     state["is_high_risk"] = is_high_risk    
 
