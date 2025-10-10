@@ -21,13 +21,25 @@ def create_fraud_cache_graph(redis_url: str) -> StateGraph:
     graph = StateGraph()
 
     # Add nodes to the graph (placeholders, replace with actual implementations)
-    graph.add_node("input_transaction", RunnableLambda(lambda x: x))
-    #graph.add_node("fraud_detection", llm | prompt)
-    graph.add_node("output_result", RunnableLambda(lambda x: x))
+    graph.add_node("score_transaction", score_transaction_node)
+    graph.add_node("score_risk", score_risk_node)
+    graph.add_node("check_cache", RunnableLambda(lambda x: x))  # Placeholder for check cache node
+    graph.add_node("fraud_detection", RunnableLambda(lambda x: x))  # Placeholder for call LLM node  llm | prompt
+    graph.add_node("compliance_check", RunnableLambda(lambda x: x))  # Optional compliance check node
 
     # Define edges
-    graph.add_edge("input_transaction", "output_result")
-    #graph.add_edge("output_result", "fraud_detection")
+    graph.add_conditional_edges("score_risk", {
+    "is_high_risk": "compliance_check",
+    "default": "check_cache"
+    })
+
+    graph.add_edge("score_transaction", "compliance_check")
+    graph.add_edge("check_cache", "fraud_detection")
+    graph.add_edge("fraud_detection", "score_risk")
+    graph.add_edge("compliance_check", "score_risk")
+
+    graph.set_start_node("score_transaction")
+    graph.set_end_node("fraud_detection")
 
     return graph
     # Note: The above code is a skeleton. Replace placeholders with actual implementations as needed.
@@ -54,19 +66,21 @@ def score_transaction(transaction_details: str) -> dict:
     """Scores a transaction for fraud."""
     # Placeholder logic for scoring
     score = random.randint(0, 100)
-    is_fraud = score > 70  # Example threshold
+    is_fraud = score > 80  # Example threshold
     return {"transaction_details": transaction_details, "score": score, "is_fraud": is_fraud}
+
+score_transaction_node = RunnableLambda(score_transaction, name="score_transaction")    
 
 def score_risk(state):
     """Scores risk based on the state."""
     # Placeholder logic for risk scoring
     #risk_score = random.randint(0, 100)
   
-    features = state.get("aml_features", {})
+    features = state.get("fraud_features", {})
     
     # simulated model prediction. Replace with actual model inference
     risk_score = fraud_model.predict_proba([features])[0][1] * 100 
-    is_high_risk = risk_score > 75  # threshold
+    is_high_risk = risk_score > 80  # threshold
     state["is_high_risk"] = is_high_risk    
 
     return {

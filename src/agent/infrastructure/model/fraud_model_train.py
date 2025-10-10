@@ -1,4 +1,5 @@
 # fraud_model_train.py
+# Script to train and save a fraud detection model using a sample dataset using Scikit-learn (RandomForestClassifier)
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
