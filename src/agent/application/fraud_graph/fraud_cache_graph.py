@@ -1,6 +1,6 @@
 from langgraph.graph import StateGraph
 from langchain_core.runnables import RunnableLambda
-from fraud_model import fraud_model
+from .score_risk import score_risk_node
 #from langchain_core import LLM
 #from langchain_core.prompts import PromptTemplate
 #from langchain_community.cache import RedisCache
@@ -21,25 +21,27 @@ def create_fraud_cache_graph(redis_url: str) -> StateGraph:
     graph = StateGraph()
 
     # Add nodes to the graph (placeholders, replace with actual implementations)
-    graph.add_node("score_transaction", score_transaction_node)
+    #graph.add_node("score_transaction", score_transaction_node)
     graph.add_node("score_risk", score_risk_node)
     graph.add_node("check_cache", RunnableLambda(lambda x: x))  # Placeholder for check cache node
-    graph.add_node("fraud_detection", RunnableLambda(lambda x: x))  # Placeholder for call LLM node  llm | prompt
+    graph.add_node("call_llm", RunnableLambda(lambda x: x))  # Placeholder for call LLM node  llm | prompt
     graph.add_node("compliance_check", RunnableLambda(lambda x: x))  # Optional compliance check node
 
     # Define edges
     graph.add_conditional_edges("score_risk", {
-    "is_high_risk": "compliance_check",
-    "default": "check_cache"
+        "is_high_risk": "compliance_check",
+        "default": "check_cache"
     })
 
-    graph.add_edge("score_transaction", "compliance_check")
-    graph.add_edge("check_cache", "fraud_detection")
-    graph.add_edge("fraud_detection", "score_risk")
-    graph.add_edge("compliance_check", "score_risk")
+    #graph.add_edge("score_transaction", "compliance_check")
+    graph.add_edge("check_cache", "call_llm", condition=lambda state: state.get("miss")) # Only call LLM if cache miss
+    #condition=lambda s: s.get("miss")
+    #graph.add_edge("compliance_check", "score_risk")
 
-    graph.set_start_node("score_transaction")
-    graph.set_end_node("fraud_detection")
+    #graph.set_entry_point("score_risk")
+    #graph.set_finish_point("call_llm")
+    graph.set_start_node("score_risk")
+    graph.set_end_node("call_llm")
 
     return graph
     # Note: The above code is a skeleton. Replace placeholders with actual implementations as needed.
@@ -71,25 +73,6 @@ def score_transaction(transaction_details: str) -> dict:
 
 score_transaction_node = RunnableLambda(score_transaction, name="score_transaction")    
 
-def score_risk(state):
-    """Scores risk based on the state."""
-    # Placeholder logic for risk scoring
-    #risk_score = random.randint(0, 100)
-  
-    features = state.get("fraud_features", {})
     
-    # simulated model prediction. Replace with actual model inference
-    risk_score = fraud_model.predict_proba([features])[0][1] * 100 
-    is_high_risk = risk_score > 80  # threshold
-    state["is_high_risk"] = is_high_risk    
-
-    return {
-        **state, 
-        "risk_score": risk_score, 
-        "is_high_risk": is_high_risk,
-        "risk_reason": "High risk based on AML features" if is_high_risk else "Low risk"
-        }
-
-score_risk_node = RunnableLambda(score_risk, name="score_risk")
 
 

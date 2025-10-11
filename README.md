@@ -3,12 +3,19 @@
 uv init .
 
 - Add dependencies and create virtual environment
+
 This installs:
-FastAPI → the web framework
-Uvicorn → the ASGI server
-redis[async] → async Redis client support
+
+* FastAPI → the web framework
+* Uvicorn → the ASGI server
+* redis[async] → async Redis client support
+* langgraph, pandas, numpy, scikit-learn etc
 
 uv add fastapi uvicorn redis[async]
+
+uv add scikit-learn pandas numpy joblib
+
+uv add langchain_core --pre langgraph
 
 - Verify installed dependencies
 

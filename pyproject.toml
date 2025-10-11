@@ -6,6 +6,12 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.118.0",
+    "joblib>=1.5.2",
+    "langchain-core>=0.3.79",
+    "langgraph>=1.0.0a4",
+    "numpy>=2.3.3",
+    "pandas>=2.3.3",
     "redis[async]>=6.4.0",
+    "scikit-learn>=1.7.2",
     "uvicorn>=0.37.0",
 ]
