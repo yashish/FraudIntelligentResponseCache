@@ -3,6 +3,7 @@ import json
 import redis
 import time
 from langchain_core.runnables import RunnableLambda
+from pgvector_search import get_embedding
 
 # Redis connection setup (ensure Redis server is running and accessible)
 redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
@@ -68,9 +69,11 @@ def check_cache(state: dict) -> dict:
     # 2. Semantic cache match (not implemented here, placeholder)
     # This would involve embedding the query and searching for similar cached entries.  
     # TODO: Implement semantic search in cache.
+    embedding = get_embedding(norm_query)  # Placeholder function
+    sem_keys = redis_client.smembers("semantic_keys")
 
     # 3. Cache miss
-        return {
+    return {
         **state,
         "miss": True
     }

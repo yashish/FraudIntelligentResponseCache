@@ -63,5 +63,29 @@ Windows: You can only run on Docker
 - Gate cache admission based on risk
 - Trigger cache bypass or regeneration for high-risk cases
 
+## Azure OpenAI configuration
+
+The project supports Azure OpenAI embeddings via the `openai` Python package. Set the following environment variables before running code that calls OpenAI:
+
+- `AZURE_OPENAI_ENDPOINT` — your Azure OpenAI resource base URL, e.g. `https://<your-resource>.openai.azure.com`
+- `AZURE_OPENAI_API_KEY` — the API key for your Azure OpenAI resource
+- `AZURE_OPENAI_EMBEDDING_DEPLOYMENT` — the deployment name you created for an embedding model (e.g. `text-embedding-3-small`)
+- `AZURE_OPENAI_API_VERSION` (optional) — API version (default `2023-05-15`)
+
+You can set these as OS environment variables or use a `.env` file for local development (do NOT commit real secrets).
+
+Example `.env` (create a file named `.env` in the repo root):
+
+```
+AZURE_OPENAI_ENDPOINT=https://<your-resource>.openai.azure.com
+AZURE_OPENAI_API_KEY=your_api_key_here
+AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embedding-3-small
+AZURE_OPENAI_API_VERSION=2023-05-15
+```
+
+If you use `.env` locally, add it to `.gitignore` to avoid committing secrets. See the repo's `.env.example` for placeholders.
+
+Note: The project uses `python-dotenv` (if installed) to automatically load a `.env` file during local development. Install dependencies (`pip install -r requirements.txt` or the project's chosen tool) to enable this behavior.
+
 
 

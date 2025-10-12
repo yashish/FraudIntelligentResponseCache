@@ -41,12 +41,15 @@ def encode_input(raw: dict) -> list[float]:
 
 def predict_risk_score(features: dict) -> float:
     """Predicts the risk score using the AML model."""
-    # feature_vector = np.array([
-    #     list(features.values())
-    # ]).reshape(1, -1)  # Reshape for a single sample
+    # Ensure all required features are present
+    # missing = [f for f in FEATURE_SCHEMA if f not in features]
+    # if missing:
+    #     raise ValueError(f"Missing features for prediction: {missing}")
 
     # Encode and reshape input features
-    feature_vector = np.array([encode_input(features)]).reshape(1, -1)
+    feature_vector = np.array([
+        encode_input(features)
+    ]).reshape(1, -1) # Reshape for a single sample
 
     # Predict proability of fraud
     proba = model.predict_proba(feature_vector)[0][1] #* 100  # Probability of the positive class
