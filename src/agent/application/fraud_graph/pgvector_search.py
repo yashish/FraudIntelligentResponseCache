@@ -74,6 +74,4 @@ def get_embedding(text: str) -> List[float]:
 def search_similar_cache(embedding: List[float], model_id, threshold=0.8): # "gpt-5o-mini", top_k=5
    # Query pgvector table for similar embeddings
    # Return {"answer": "...", "similarity": 0.92} or None
-   
-
-
+   pass
