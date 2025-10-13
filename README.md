@@ -6,12 +6,13 @@ uv init .
 
 This installs:
 
-* FastAPI → the web framework
-* Uvicorn → the ASGI server
-* redis[async] → async Redis client support
+* FastAPI - the web framework
+* Uvicorn - the ASGI server
+* redis[async] - async Redis client support
+* asyncpg - pgvector client
 * langgraph, pandas, numpy, scikit-learn etc
 
-uv add fastapi uvicorn redis[async]
+uv add fastapi uvicorn redis[async] asyncpg
 
 uv add scikit-learn pandas numpy joblib
 
@@ -86,6 +87,26 @@ AZURE_OPENAI_API_VERSION=2023-05-15
 If you use `.env` locally, add it to `.gitignore` to avoid committing secrets. See the repo's `.env.example` for placeholders.
 
 Note: The project uses `python-dotenv` (if installed) to automatically load a `.env` file during local development. Install dependencies (`pip install -r requirements.txt` or the project's chosen tool) to enable this behavior.
+
+# Semantic Cache
+## Install pgvector extension and create the index
+
+CREATE EXTENSION IF NOT EXISTS vector;
+CREATE INDEX ON semantic_cache USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+
+- Create a PostgreSQL table named semantic_cache with columns
+* id: UUID
+* query: original query text
+* answer: cached LLM response
+* embedding: vector(1536) or similar
+* created_ts: timestamp
+
+* Best Practices
+- Use ivfflat index for fast similarity search
+- Normalize embeddings before insert/search
+- Store model_id, persona, locale as additional filters if needed for cache multi-dimensional cache
+- Add TTL logic to exclude stale entries
+
 
 
 

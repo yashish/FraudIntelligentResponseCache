@@ -3,7 +3,9 @@ import json
 import redis
 import time
 from langchain_core.runnables import RunnableLambda
-from pgvector_search import get_embedding
+from pgvector_search import get_embedding, search_similar_cache
+from semantic_cache_client import SemanticCacheClient
+from typing import List, Optional
 
 # Redis connection setup (ensure Redis server is running and accessible)
 redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
@@ -35,7 +37,7 @@ def is_fresh(meta: dict) -> bool:
     return time.time() - created <= soft_ttl
 
 
-def check_cache(state: dict) -> dict:
+async def check_cache(state: dict) -> dict:
     """Checks the cache for a response based on the state."""
     query = state.get("query")
     model_id = state.get("model_id", "gpt-5o-mini")
@@ -52,7 +54,7 @@ def check_cache(state: dict) -> dict:
     
     cache_key = f"exact:{hash(key_blob)}"
     
-    # 1. Exact cache match
+    # 1. Exact cache match TODO: turn into async
     cached = redis_client.get(cache_key)
     if cached:
         cached_data = json.loads(cached)
@@ -66,11 +68,45 @@ def check_cache(state: dict) -> dict:
             })
             return state
     
-    # 2. Semantic cache match (not implemented here, placeholder)
+    # 2. Semantic cache match
     # This would involve embedding the query and searching for similar cached entries.  
     # TODO: Implement semantic search in cache.
-    embedding = get_embedding(norm_query)  # Placeholder function
-    sem_keys = redis_client.smembers("semantic_keys")
+    embedding = get_embedding(norm_query) # get embedding for the normalized query
+
+    #TODO: Make SemanticCacheClient a singleton or manage its lifecycle appropriately
+    # Consider using a context manager or dependency injection for better lifecycle management
+    # get connection details from config or environment
+    client = SemanticCacheClient({
+        "user": "youruser",
+        "password": "yourpass",
+        "database": "yourdb",
+        "host": "yourhost",
+        "port": 5432
+    })
+    # Ensure to connect to the database before searching
+    await client.connect() 
+    # Perform the semantic search
+    # semantic_hit = search_similar_cache(embedding, model_id, threshold=0.8) # Implement this function
+    semantic_hit = await client.search_similar_cache(embedding, top_k=5)
+    await client.close()  
+
+    if semantic_hit:
+        state.update({
+            **state,
+            "answer": semantic_hit.get("answer"), # semantic_hit["answer"]
+            "miss": False,
+            "similarity": semantic_hit["similarity"],
+            "source": "semantic_cache"
+            #"cache_key": semantic_hit.get("cache_key"),
+            #"cache_meta": semantic_hit.get("meta", {})
+        })
+        return state
+
+    # Step 6: Cache admission control
+    # if risk_score < 0.8:
+    #     await set_exact_cache(key, response, ttl=3600)
+    #     await upsert_semantic_cache(req.query, response, embedding)
+
 
     # 3. Cache miss
     return {

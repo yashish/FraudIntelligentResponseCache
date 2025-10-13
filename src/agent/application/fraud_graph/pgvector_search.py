@@ -7,9 +7,6 @@
 # def connect_to_pgvector_db():
 #     # connection logic here
 #     pass
-# def search_similar_vectors(vector, top_k=5):
-#     # search logic here
-#     pass  
 # def insert_vector(vector, metadata):
 #     # insertion logic here
 #     pass
@@ -70,4 +67,13 @@ def get_embedding(text: str) -> List[float]:
     # `engine` param is used when talking to Azure OpenAI via the openai package
     resp = openai.Embedding.create(engine=AZURE_OPENAI_EMBEDDING_DEPLOYMENT, input=text)
     return resp["data"][0]["embedding"]
+# Example usage:
+# vector = get_embedding("Sample text to embed")
+
+
+def search_similar_cache(embedding: List[float], model_id, threshold=0.8): # "gpt-5o-mini", top_k=5
+   # Query pgvector table for similar embeddings
+   # Return {"answer": "...", "similarity": 0.92} or None
+   
+
 
