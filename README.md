@@ -107,6 +107,31 @@ CREATE INDEX ON semantic_cache USING ivfflat (embedding vector_cosine_ops) WITH 
 - Store model_id, persona, locale as additional filters if needed for cache multi-dimensional cache
 - Add TTL logic to exclude stale entries
 
+# After installing PostgreSQL create table and index:
+
+-- Ensure pgvector is available
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- (Optional) for gen_random_uuid() default — requires pgcrypto
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Create semantic_cache table
+CREATE TABLE IF NOT EXISTS semantic_cache (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    query TEXT NOT NULL,
+    answer TEXT,
+    embedding vector(1536) NOT NULL,
+    created_ts TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Create ivfflat index for fast nearest-neighbor search using cosine similarity.
+-- Tune "lists" for performance based on dataset size (e.g., 100..1000).
+CREATE INDEX IF NOT EXISTS semantic_cache_embedding_idx
+    ON semantic_cache USING ivfflat (embedding vector_cosine_ops)
+    WITH (lists = 100);
+
+* Note that using a Docker image with pre-installed pgvector and pgcrypto is the preferred developer workflow
+
 
 
 

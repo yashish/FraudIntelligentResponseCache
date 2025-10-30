@@ -30,6 +30,14 @@ class SemanticCacheClient:
             raise RuntimeError("Database connection is not established. Call connect() first.")
         
         async with self.pool.acquire() as connection:
+            query = """
+                SELECT query, answer, 1 - (embedding <=> $1::vector) AS similarity
+                FROM semantic_cache
+                WHERE 1 - (embedding <=> $1::vector) >= $2
+                ORDER BY embedding <=> $1::vector
+                LIMIT 1;
+            """
+
             rows = await connection.fetch(
                 """
                 SELECT metadata, embedding <=> $1 AS distance
