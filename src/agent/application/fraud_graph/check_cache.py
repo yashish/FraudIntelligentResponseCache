@@ -69,9 +69,10 @@ async def check_cache(state: dict) -> dict:
             return state
     
     # 2. Semantic cache match
-    # This would involve embedding the query and searching for similar cached entries.  
-    # TODO: Implement semantic search in cache.
-    embedding = get_embedding(norm_query) # get embedding for the normalized query
+    # Embed the query and searching for similar cached entries.  
+    #embedding = get_embedding(norm_query) # get embedding for the normalized query
+    #query = state["query"]
+
 
     #TODO: Make SemanticCacheClient a singleton or manage its lifecycle appropriately
     # Consider using a context manager or dependency injection for better lifecycle management
@@ -83,6 +84,9 @@ async def check_cache(state: dict) -> dict:
         "host": "yourhost",
         "port": 5432
     })
+
+    embedding = client.get_embedding(norm_query) # get embedding for the normalized query
+
     # Ensure to connect to the database before searching
     await client.connect() 
     # Perform the semantic search

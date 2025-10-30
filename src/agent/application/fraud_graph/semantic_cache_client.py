@@ -1,6 +1,19 @@
+from urllib import response
 import asyncpg
 from typing import List, Optional
 import numpy
+
+import openai
+import os
+
+# Set Azure OpenAI credentials
+openai.api_type = "azure"
+openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")  # e.g., https://your-resource-name.openai.azure.com/
+openai.api_version = "2023-07-01-preview"
+openai.api_key = os.getenv("AZURE_OPENAI_KEY")
+
+EMBEDDING_DEPLOYMENT = "embedding-ada-002"  # Your deployment name
+
 
 class SemanticCacheClient:
     def __init__(self, dsn: str):
@@ -13,6 +26,13 @@ class SemanticCacheClient:
     async def close(self):
         if self.pool:
             await self.pool.close()
+    
+    async def get_embedding(text: str) -> list[float]:
+        response = openai.Embedding.create(
+            input=[text],
+            engine=EMBEDDING_DEPLOYMENT
+        )
+        return response["data"][0]["embedding"]
 
     async def insert_vector(self, vector: List[float], metadata: str):
         if not self.pool:
