@@ -8,6 +8,37 @@ import os
 
 app = FastAPI(title="FastAPI + Redis/Semantic Cache")
 
+class AMLInput(BaseModel):
+    transaction_amount: float
+    transaction_type: str
+    transaction_hour: int
+    origin_country: str
+    destination_country: str
+    customer_age: int
+    account_tenure_days: int
+    kyc_verified: bool
+    prior_fraud_flag: bool
+    device_type: str
+    ip_risk_score: float
+    velocity_score: float
+
+#Placeholder for actual model prediction function
+@app.post("/score")
+async def score(input: AMLInput):
+    raw = input.dict()
+    risk_score = predict_risk_score(raw)
+    return {
+        "risk_score": risk_score,
+        "risk_level": (
+            "low" if risk_score < 0.3 else
+            "medium" if risk_score < 0.6 else
+            "elevated" if risk_score < 0.8 else
+            "high"
+        ),
+        "note": "Use this score to gate cache admission or route to compliance agent"
+    }
+
+
 REDIS_HOST = os.getenv("REDIS_HOST", "redis://localhost:6379/0")
 #redis = aioredis.from_url(f"redis://{REDIS_HOST}", decode_responses=True)
 #lock = asyncio.Lock()
