@@ -70,7 +70,6 @@ async def check_cache(state: dict) -> dict:
     
     # 2. Semantic cache match
     # Embed the query and searching for similar cached entries.  
-    #embedding = get_embedding(norm_query) # get embedding for the normalized query
     #query = state["query"]
 
 
@@ -78,10 +77,10 @@ async def check_cache(state: dict) -> dict:
     # Consider using a context manager or dependency injection for better lifecycle management
     # get connection details from config or environment
     client = SemanticCacheClient({
-        "user": "youruser",
-        "password": "yourpass",
-        "database": "yourdb",
-        "host": "yourhost",
+        "user": "postgres",
+        "password": "postgres",
+        "database": "fraud_monitoring_db",
+        "host": "postgres-db",
         "port": 5432
     })
 
@@ -97,7 +96,7 @@ async def check_cache(state: dict) -> dict:
     if semantic_hit:
         state.update({
             **state,
-            "answer": semantic_hit.get("answer"), # semantic_hit["answer"]
+            "answer": semantic_hit["answer"],
             "miss": False,
             "similarity": semantic_hit["similarity"],
             "source": "semantic_cache"

@@ -26,7 +26,7 @@ def create_fraud_cache_graph(redis_url: str) -> StateGraph:
     graph.add_node("score_risk", score_risk_node)
     graph.add_node("check_cache", check_cache_node)  # Placeholder for check cache node
     graph.add_node("call_llm", RunnableLambda(lambda x: x))  # Placeholder for call LLM node  llm | prompt
-    graph.add_node("compliance_check", RunnableLambda(lambda x: x))  # Optional compliance check node
+    #graph.add_node("compliance_check", RunnableLambda(lambda x: x))  # Optional compliance check node
 
     # Define edges
     graph.add_conditional_edges("score_risk", {
